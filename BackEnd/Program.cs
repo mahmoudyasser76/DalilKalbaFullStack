@@ -93,5 +93,6 @@ app.UseCors("AllowReactApp");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapGet("/", () => "Dalil Kalba API is running 🚀");
 
 app.Run();
