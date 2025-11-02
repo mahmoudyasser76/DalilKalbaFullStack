@@ -13,7 +13,7 @@ builder.Services.AddLogging(logging =>
     logging.AddDebug();
 });
 
-// Add services to the container.
+// Add controllers
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -37,12 +37,14 @@ builder.Services.AddCors(options =>
     });
 });
 
-
-// Add DbContext
+// ✅ Add DbContext using MySQL
 builder.Services.AddDbContext<DalilKalbaContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+});
 
-// Add JWT Authentication
+// ✅ Add JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -66,6 +68,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// ✅ Use Railway PORT env var (important for hosting)
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -74,7 +77,7 @@ builder.WebHost.ConfigureKestrel(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -102,3 +105,4 @@ app.MapControllers();
 app.MapGet("/", () => "Dalil Kalba API is running 🚀");
 
 app.Run();
+
