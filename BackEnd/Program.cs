@@ -77,6 +77,14 @@ builder.WebHost.ConfigureKestrel(options =>
 
 var app = builder.Build();
 
+// Auto-apply pending EF Core migrations at startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DalilKalbaContext>();
+    db.Database.Migrate();
+}
+
+
 // Configure middleware
 if (app.Environment.IsDevelopment())
 {
