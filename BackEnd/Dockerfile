@@ -1,18 +1,23 @@
-# Use official .NET SDK image for building
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+# ---- Build stage ----
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy everything and build the project
-COPY . .
-RUN dotnet publish -c Release -o /app/out
+# copy csproj and restore
+COPY *.csproj ./
+RUN dotnet restore
 
-# Use ASP.NET runtime for final image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0
+# copy everything else and build
+COPY . ./
+RUN dotnet publish -c Release -o /app/publish
+
+# ---- Runtime stage ----
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app/out .
+COPY --from=build /app/publish .
 
-# Expose port (Render will use this)
+# port to listen on 
+ENV ASPNETCORE_URLS=http://+:8080
+
 EXPOSE 8080
-
-# Start the app
 ENTRYPOINT ["dotnet", "DalilKalba.dll"]
+
