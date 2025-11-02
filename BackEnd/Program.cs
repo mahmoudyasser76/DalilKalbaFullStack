@@ -68,7 +68,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ✅ Use Railway PORT env var (important for hosting)
+// ✅ Use Render or Railway PORT env var (important for hosting)
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -76,14 +76,22 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 var app = builder.Build();
-/*
-// Auto-apply pending EF Core migrations at startup
+
+
+// ✅ Automatically apply EF Core migrations at startup
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<DalilKalbaContext>();
-    db.Database.Migrate();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<DalilKalbaContext>();
+        db.Database.Migrate();
+        Console.WriteLine("✅ Database migration applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Database migration failed: {ex.Message}");
+    }
 }
-*/
 
 // Configure middleware
 if (app.Environment.IsDevelopment())
@@ -113,4 +121,5 @@ app.MapControllers();
 app.MapGet("/", () => "Dalil Kalba API is running 🚀");
 
 app.Run();
+
 
